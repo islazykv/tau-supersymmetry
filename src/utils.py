@@ -1,7 +1,8 @@
 import warnings
-import pandas as pd
-import awkward as ak
 from pathlib import Path
+
+import awkward as ak
+import pandas as pd
 
 
 def suppress_warnings():

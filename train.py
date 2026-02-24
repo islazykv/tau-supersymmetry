@@ -1,7 +1,7 @@
-import pyrootutils
 import hydra
-from omegaconf import DictConfig, OmegaConf
 import mlflow
+import pyrootutils
+from omegaconf import DictConfig, OmegaConf
 
 root = pyrootutils.setup_root(
     search_from=__file__,
