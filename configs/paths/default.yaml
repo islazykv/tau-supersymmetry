@@ -1,0 +1,5 @@
+data: "/disk/atlas3/data_MC/{analysis_base}/PHYS/{campaign}/vector_XEplateau/{sample}.root"
+background: "/disk/atlas3/data_MC/{analysis_base}/PHYS/{campaign}/vector_XEplateau/{sample}.root"
+signal: "/disk/atlas3/data_MC/{analysis_base}/PHYS/{campaign}/vector_XEplateau/{sample}.root"
+fake: "/disk/atlas3/users/thillers/fakeTaus/R24.2.28/{campaign}/{sample}.root"
+tree_name: "NOMINAL"

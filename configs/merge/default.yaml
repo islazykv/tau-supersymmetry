@@ -1,0 +1,12 @@
+background_strategy: "as_primary"
+
+primary_groups:
+  topquarks:
+    - ttbar
+    - singletop
+  wtaunu:
+    - wtaunu
+  ztautau:
+    - ztautau
+  diboson:
+    - diboson

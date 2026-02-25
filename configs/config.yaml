@@ -3,6 +3,15 @@ defaults:
   - data: default
   - model: xgboost
   - pipeline: default
+  - features: default
+  - paths: default
+  - merge: default
+  - run@analysis: run2
+  - regions@analysis: preselection_ch1
+  - samples@samples.background: background
+  - samples@samples.fake: fake
+  - samples@samples.signal: signal
+  - samples@samples.data: data
 
 experiment_name: "tau-supersymmetry-baseline"
 seed: 1

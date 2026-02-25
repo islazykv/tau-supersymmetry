@@ -1,0 +1,7 @@
+run: "Run3"
+release: "R24"
+analysis_base: "24.2.28"
+campaigns:
+  - "MC23a"
+  - "MC23c"
+scope: "ML"
