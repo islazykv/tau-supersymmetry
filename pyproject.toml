@@ -28,10 +28,15 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "dvc>=3.56.0",
     "pre-commit>=4.5.1",
     "pytest>=9.0.2",
     "ruff>=0.15.2",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.ruff]
 extend-exclude = ["notebooks/*.ipynb"]
