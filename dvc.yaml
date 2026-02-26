@@ -1,0 +1,9 @@
+stages:
+  preprocess:
+    cmd: uv run python preprocess.py
+    deps:
+      - preprocess.py
+      - src/processing/
+      - configs/
+    outs:
+      - data/processed/run2/

@@ -1,6 +1,8 @@
 .venv/
 __pycache__/
-data/
+data/raw/
+data/external/
+data/processed/
 mlruns/
 .env
 .DS_Store
