@@ -50,7 +50,7 @@ def _discover_signals(scan_path: str, filter_patterns: list[str]) -> list[Sample
 def resolve_samples(cfg: DictConfig) -> dict[str, list[Sample]]:
     """Build sample lists from the Hydra config, applying excludes and signal discovery.
 
-    Returns a dict with keys 'data', 'background', 'fake', 'signal', each mapping
+    Returns a dict with keys 'data', 'background', 'signal', each mapping
     to a list of Sample objects (empty list if the category is disabled).
     """
     result: dict[str, list[Sample]] = {}
@@ -71,14 +71,6 @@ def resolve_samples(cfg: DictConfig) -> dict[str, list[Sample]]:
         result["background"] = _apply_excludes(bg_cfg.samples, excludes)
     else:
         result["background"] = []
-
-    # --- fake ---
-    fake_cfg = cfg.samples.fake
-    if fake_cfg.get("enabled", False):
-        excludes = list(fake_cfg.get("exclude", []))
-        result["fake"] = _apply_excludes(fake_cfg.samples, excludes)
-    else:
-        result["fake"] = []
 
     # --- signal ---
     sig_cfg = cfg.samples.signal

@@ -32,7 +32,6 @@ def ml_cfg():
                 "kinematic": ["met", "meff"],
                 "channel_1": ["mu_n", "mu_pt"],
                 "channel_2": ["Mt2", "sumMT"],
-                "fake_weights": ["ff_weight_1", "ff_weight_4"],
             },
             "samples": {
                 "data": {"enabled": False, "samples": []},
@@ -45,7 +44,6 @@ def ml_cfg():
                         {"id": "diboson", "label": "diboson"},
                     ],
                 },
-                "fake": {"enabled": False, "exclude": [], "samples": []},
                 "signal": {"enabled": False},
             },
             "data": {"processed_path": "data/processed/run2/output.parquet"},

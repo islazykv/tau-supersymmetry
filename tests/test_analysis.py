@@ -33,7 +33,6 @@ def test_apply_excludes_empty_excludes():
 def test_resolve_samples_disabled_returns_empty(ml_cfg):
     samples = resolve_samples(ml_cfg)
     assert samples["data"] == []
-    assert samples["fake"] == []
     assert samples["signal"] == []
 
 

@@ -15,10 +15,8 @@ from src.processing.analysis import get_output_paths, resolve_samples  # noqa: E
 from src.processing.io import save_samples  # noqa: E402
 from src.processing.merger import (  # noqa: E402
     assign_class,
-    combine_background_fake,
     combine_background_signal,
     merge_backgrounds,
-    merge_fakes,
 )
 from src.processing.processor import process_samples  # noqa: E402
 
@@ -30,9 +28,8 @@ def main(cfg: DictConfig):
     samples = resolve_samples(cfg)
 
     log.info(
-        "Resolved samples — background: %d, fake: %d, signal: %d",
+        "Resolved samples — background: %d, signal: %d",
         len(samples["background"]),
-        len(samples["fake"]),
         len(samples["signal"]),
     )
 
@@ -43,12 +40,6 @@ def main(cfg: DictConfig):
         log.info("Processing %d background samples", len(samples["background"]))
         processed["background"] = process_samples(
             cfg, "background", [s.id for s in samples["background"]]
-        )
-
-    if samples["fake"]:
-        log.info("Processing %d fake samples", len(samples["fake"]))
-        processed["fake"] = process_samples(
-            cfg, "fake", [s.id for s in samples["fake"]]
         )
 
     if samples["signal"]:
@@ -63,11 +54,6 @@ def main(cfg: DictConfig):
         log.info("Merged backgrounds into %d group(s)", len(merged))
     else:
         merged = {}
-
-    if "fake" in processed:
-        merged_fakes = merge_fakes(processed["fake"])
-        merged = combine_background_fake(merged, merged_fakes)
-        log.info("Combined fakes into merged samples")
 
     if "signal" in processed:
         merged = combine_background_signal(merged, processed["signal"])

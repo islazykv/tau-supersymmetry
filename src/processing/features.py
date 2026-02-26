@@ -3,17 +3,12 @@ from __future__ import annotations
 from omegaconf import DictConfig, OmegaConf
 
 
-def resolve_features(
-    cfg: DictConfig,
-    *,
-    fake: bool = False,
-) -> list[str]:
+def resolve_features(cfg: DictConfig) -> list[str]:
     """Build a flat feature list from the Hydra features config.
 
     For the ML scope the config is structured by category (cleaning, truth,
-    weights, tau, jet, kinematic, training, channel_1, channel_2, fake_weights).
-    Channel-specific and fake-weight groups are appended based on the analysis
-    channel and whether we are processing fake samples.
+    weights, tau, jet, kinematic, training, channel_1, channel_2).
+    Channel-specific groups are appended based on the analysis channel.
 
     For the NTuples / CC scopes the config contains a flat ``features`` list
     which is returned as-is.
@@ -22,8 +17,6 @@ def resolve_features(
     ----------
     cfg:
         Full Hydra config (must contain ``features`` and ``analysis`` groups).
-    fake:
-        Whether fake-weight features should be included.
     """
     feat_cfg = cfg.features
     scope = cfg.analysis.scope
@@ -50,8 +43,5 @@ def resolve_features(
         features.extend(OmegaConf.to_container(feat_cfg.channel_1, resolve=True))
     elif channel == "2":
         features.extend(OmegaConf.to_container(feat_cfg.channel_2, resolve=True))
-
-    if fake:
-        features.extend(OmegaConf.to_container(feat_cfg.fake_weights, resolve=True))
 
     return features

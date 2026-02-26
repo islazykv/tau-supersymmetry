@@ -86,7 +86,3 @@ channel_1:
 channel_2:
   - Mt2
   - sumMT
-
-fake_weights:
-  - ff_weight_1
-  - ff_weight_4

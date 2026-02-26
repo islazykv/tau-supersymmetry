@@ -9,7 +9,6 @@ from src.processing.merger import (
     combine_background_signal,
     dict_to_array,
     merge_backgrounds,
-    merge_fakes,
 )
 
 
@@ -47,13 +46,6 @@ def test_merge_backgrounds_as_primary():
     assert set(result.keys()) == {"topquarks", "diboson"}
     assert len(result["topquarks"]) == 8
     assert len(result["diboson"]) == 4
-
-
-def test_merge_fakes():
-    samples = {"fake1": _make_array(3), "fake2": _make_array(7)}
-    result = merge_fakes(samples)
-    assert list(result.keys()) == ["faketaus"]
-    assert len(result["faketaus"]) == 10
 
 
 def test_combine_background_signal():

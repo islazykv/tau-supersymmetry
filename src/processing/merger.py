@@ -50,23 +50,6 @@ def merge_backgrounds(
     )
 
 
-def merge_fakes(samples: dict[str, ak.Array]) -> dict[str, ak.Array]:
-    """Merge all fake samples into a single ``'faketaus'`` key."""
-    merged = ak.concatenate(list(samples.values()), axis=0)
-    return {"faketaus": merged}
-
-
-def combine_background_fake(
-    background: dict[str, ak.Array],
-    fake: dict[str, ak.Array],
-) -> dict[str, ak.Array]:
-    """Add merged fakes to the background dict, dropping ff_weight columns."""
-    fake_features_delete = {"ff_weight_1", "ff_weight_4"}
-    faketaus = fake["faketaus"]
-    faketaus = faketaus[[f for f in faketaus.fields if f not in fake_features_delete]]
-    return {**background, "faketaus": faketaus}
-
-
 def combine_background_signal(
     background: dict[str, ak.Array],
     signal: dict[str, ak.Array],

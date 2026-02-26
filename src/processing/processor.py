@@ -77,9 +77,7 @@ def _apply_cleaning_cuts(ar: ak.Array) -> ak.Array:
     return ar
 
 
-def _apply_rnn_cuts(ar: ak.Array, ntau: str, sample_type: str) -> ak.Array:
-    if sample_type == "fake":
-        return ar
+def _apply_rnn_cuts(ar: ak.Array, ntau: str) -> ak.Array:
     if ntau == "1":
         ar = ar[ar.tau_JetRNNMedium[:, 0] != 0]
     elif ntau == "2":
@@ -97,23 +95,11 @@ def _apply_truth_cuts(
     if scope == "NTuples":
         return ar
 
-    if ntau == "1":
-        if sample_type == "fake":
-            ar = ar[
-                (ar.tau_isTruthMatchedTau[:, 0] == 0) | (ar.tau_truthType[:, 0] != 10)
-            ]
-        elif sample_type == "background":
+    if sample_type == "background":
+        if ntau == "1":
             ar = ar[ar.tau_isTruthMatchedTau[:, 0] == 1]
             ar = ar[ar.tau_truthType[:, 0] == 10]
-    elif ntau == "2":
-        if sample_type == "fake":
-            ar = ar[
-                (ar.tau_isTruthMatchedTau[:, 0] == 0)
-                | (ar.tau_truthType[:, 0] != 10)
-                | (ar.tau_isTruthMatchedTau[:, 1] == 0)
-                | (ar.tau_truthType[:, 1] != 10)
-            ]
-        elif sample_type == "background":
+        elif ntau == "2":
             ar = ar[ar.tau_isTruthMatchedTau[:, 0] == 1]
             ar = ar[ar.tau_truthType[:, 0] == 10]
             ar = ar[ar.tau_isTruthMatchedTau[:, 1] == 1]
@@ -262,7 +248,7 @@ def _apply_cr_cuts(
     return ar
 
 
-def _compute_weight(ar: ak.Array, sample_type: str, ntau: str) -> ak.Array:
+def _compute_weight(ar: ak.Array) -> ak.Array:
     ar["weight"] = (
         ar.lumiweight
         * ar.mcEventWeight
@@ -274,22 +260,6 @@ def _compute_weight(ar: ak.Array, sample_type: str, ntau: str) -> ak.Array:
         * ar.ele_weight
         * ar.mu_weight
     )
-    if sample_type == "fake":
-        if ntau == "1":
-            ar["weight"] = ar["weight"] * (
-                1 / 2 * (ar.ff_weight_1[:, 0] + ar.ff_weight_4[:, 0])
-            )
-        elif ntau == "2":
-            ar["weight"] = ar["weight"] * (
-                1
-                / 2
-                * (
-                    ar.ff_weight_1[:, 0]
-                    + ar.ff_weight_4[:, 0]
-                    + ar.ff_weight_1[:, 1]
-                    + ar.ff_weight_4[:, 1]
-                )
-            )
     return ar
 
 
@@ -310,7 +280,7 @@ def process_samples(
     cfg:
         Full Hydra config.
     sample_type:
-        One of ``'data'``, ``'background'``, ``'fake'``, ``'signal'``.
+        One of ``'data'``, ``'background'``, ``'signal'``.
     sample_ids:
         List of sample identifiers (file stems) to process.
 
@@ -326,7 +296,7 @@ def process_samples(
     ntau = _ntau_from_channel(channel)
     tree_name = cfg.paths.tree_name
 
-    load_features = resolve_features(cfg, fake=(sample_type == "fake"))
+    load_features = resolve_features(cfg)
 
     log.info(
         "Processing %s samples | region=%s | channel=%s | subject=%s | sub_subject=%s",
@@ -349,11 +319,11 @@ def process_samples(
 
             ar = _apply_channel_cuts(ar, channel, ntau, region)
             ar = _apply_cleaning_cuts(ar)
-            ar = _apply_rnn_cuts(ar, ntau, sample_type)
+            ar = _apply_rnn_cuts(ar, ntau)
             ar = _apply_truth_cuts(ar, ntau, sample_type, scope)
             ar = _apply_kinematic_cuts(ar, scope, subject)
             ar = _apply_region_cuts(ar, region, channel, ntau, subject, sub_subject)
-            ar = _compute_weight(ar, sample_type, ntau)
+            ar = _compute_weight(ar)
 
             if j == 0:
                 data_out[sample_id] = ar

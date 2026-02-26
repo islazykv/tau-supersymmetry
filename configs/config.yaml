@@ -9,7 +9,6 @@ defaults:
   - run@analysis: run2
   - regions@analysis: preselection_ch1
   - samples@samples.background: background
-  - samples@samples.fake: fake
   - samples@samples.signal: signal
   - samples@samples.data: data
   - override hydra/job_logging: default
