@@ -1,4 +1,5 @@
 background_strategy: "as_primary"
+signal_strategy: "as_one"
 
 primary_groups:
   topquarks:
@@ -10,3 +11,11 @@ primary_groups:
     - ztautau
   diboson:
     - diboson
+
+signal_type_names:
+  GG: gluinos
+  SS: squarks
+
+mass_thresholds:
+  gluinos: [1000, 1700]
+  squarks: [800, 1400]

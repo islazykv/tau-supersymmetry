@@ -35,6 +35,114 @@ def merge_backgrounds(
     )
 
 
+def group_samples(
+    samples: dict[str, ak.Array],
+    cfg: DictConfig,
+) -> dict[str, dict[str, ak.Array]]:
+    """Group a flat sample dict into data/background/signal categories using cfg."""
+    data_ids: set[str] = set()
+    if cfg.samples.data.get("enabled", False):
+        data_ids = {
+            s["id"]
+            for s in OmegaConf.to_container(cfg.samples.data.samples, resolve=True)
+        }
+
+    signal_patterns: list[str] = []
+    if cfg.samples.signal.get("enabled", False):
+        signal_patterns = list(cfg.samples.signal.filter_patterns)
+
+    data: dict[str, ak.Array] = {}
+    background: dict[str, ak.Array] = {}
+    signal: dict[str, ak.Array] = {}
+
+    for sid, array in samples.items():
+        if sid in data_ids:
+            data[sid] = array
+        elif any(pat in sid for pat in signal_patterns):
+            signal[sid] = array
+        else:
+            background[sid] = array
+
+    return {"data": data, "background": background, "signal": signal}
+
+
+def merge_signals(
+    signal: dict[str, ak.Array],
+    cfg: DictConfig,
+) -> dict[str, ak.Array]:
+    """Merge signal samples according to the strategy defined in cfg.
+
+    Strategies:
+      as_is   - keep each signal point as a separate sample (250+ entries).
+      as_one  - concatenate all into a single 'signal' sample.
+      as_type - group by particle type: gluinos (GG_*) and squarks (SS_*).
+      as_mass - group by type and mass range (low/medium/high) using
+                thresholds from cfg.merge.mass_thresholds.
+    """
+    strategy = cfg.merge.signal_strategy
+
+    if strategy == "as_is":
+        return dict(signal)
+
+    if strategy == "as_one":
+        return {"signal": ak.concatenate(list(signal.values()), axis=0)}
+
+    type_names: dict[str, str] = OmegaConf.to_container(
+        cfg.merge.signal_type_names, resolve=True
+    )
+
+    if strategy == "as_type":
+        out: dict[str, ak.Array] = {}
+        for sid, array in signal.items():
+            prefix = sid.split("_")[0]
+            group = type_names.get(prefix, prefix)
+            out[group] = (
+                ak.concatenate([out[group], array], axis=0) if group in out else array
+            )
+        return out
+
+    if strategy == "as_mass":
+        thresholds: dict[str, list[int]] = OmegaConf.to_container(
+            cfg.merge.mass_thresholds, resolve=True
+        )
+        out = {}
+        for sid, array in signal.items():
+            parts = sid.split("_")
+            prefix = parts[0]
+            mass = int(parts[1])
+            type_name = type_names.get(prefix, prefix)
+            lo, hi = thresholds.get(type_name, [0, 0])
+            if mass < lo:
+                group = f"low_mass_{type_name}"
+            elif mass < hi:
+                group = f"medium_mass_{type_name}"
+            else:
+                group = f"high_mass_{type_name}"
+            out[group] = (
+                ak.concatenate([out[group], array], axis=0) if group in out else array
+            )
+        return out
+
+    raise ValueError(
+        f"Unsupported signal_strategy '{strategy}'. "
+        "Use 'as_is', 'as_one', 'as_type', or 'as_mass'."
+    )
+
+
+def split_mc_data(
+    grouped: dict[str, dict[str, ak.Array]],
+) -> tuple[dict[str, ak.Array], dict[str, ak.Array]]:
+    """Split grouped samples into MC (background + signal) and data.
+
+    Returns:
+        samples_mc:   background + signal, used for ML training.
+        samples_data: data only, used for validation/plotting.
+    """
+    samples_mc = {**grouped.get("background", {}), **grouped.get("signal", {})}
+    samples_data = dict(grouped.get("data", {}))
+    return samples_mc, samples_data
+
+
 def combine_background_signal(
     background: dict[str, ak.Array],
     signal: dict[str, ak.Array],

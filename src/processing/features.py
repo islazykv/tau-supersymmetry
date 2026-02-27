@@ -1,6 +1,14 @@
 from __future__ import annotations
 
+import awkward as ak
 from omegaconf import DictConfig, OmegaConf
+
+
+def assign_event_origin(grouped: dict[str, dict[str, ak.Array]]) -> None:
+    """Add an ``'eventOrigin'`` field to each array in-place, set to the sample id."""
+    for category in grouped.values():
+        for sid, array in category.items():
+            category[sid] = ak.with_field(array, sid, "eventOrigin")
 
 
 def resolve_features(cfg: DictConfig) -> list[str]:
