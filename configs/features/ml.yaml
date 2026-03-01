@@ -86,3 +86,7 @@ channel_1:
 channel_2:
   - Mt2
   - sumMT
+
+drop_extra:
+  - eventOrigin
+  - tau_n

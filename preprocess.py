@@ -61,9 +61,9 @@ def main(cfg: DictConfig):
 
     # --- save ---
     output_paths = get_output_paths(cfg)
-    output_dir = output_paths["output_dir"]
-    save_samples(merged, output_dir)
-    log.info("Preprocessing complete — output saved to %s", output_dir)
+    samples_dir = output_paths["samples_dir"]
+    save_samples(merged, samples_dir)
+    log.info("Preprocessing complete — output saved to %s", samples_dir)
 
 
 if __name__ == "__main__":

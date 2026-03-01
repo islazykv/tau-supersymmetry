@@ -85,16 +85,18 @@ def resolve_samples(cfg: DictConfig) -> dict[str, list[Sample]]:
 
 
 def get_output_paths(cfg: DictConfig) -> dict[str, Path]:
-    """Compute and return output and plots directory paths from analysis config values."""
+    """Compute and return samples, dataframes, and plots directory paths from analysis config values."""
     analysis = cfg.analysis
-    base = Path(cfg.data.processed_path)
-    output_dir = (
-        base
+    base = (
+        Path(cfg.data.processed_path)
         / analysis.scope
         / analysis.analysis_base
         / analysis.run
         / (analysis.region or "")
         / (f"{analysis.channel}_tau" if analysis.channel else "")
     )
-    plots_dir = output_dir / "plots"
-    return {"output_dir": output_dir, "plots_dir": plots_dir}
+    return {
+        "samples_dir": base / "samples",
+        "dataframes_dir": base / "dataframes",
+        "plots_dir": base / "plots",
+    }
