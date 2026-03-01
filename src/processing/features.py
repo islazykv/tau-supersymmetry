@@ -21,6 +21,16 @@ def assign_event_origin(grouped: dict[str, dict[str, ak.Array]]) -> None:
             category[sid] = ak.with_field(array, sid, "eventOrigin")
 
 
+def resolve_features_to_drop(cfg: DictConfig) -> list[str]:
+    """Build the list of features to drop before rectangularization from config."""
+    feat_cfg = cfg.features
+    drop: list[str] = []
+    for group in ("cleaning", "truth", "weights"):
+        drop.extend(OmegaConf.to_container(feat_cfg[group], resolve=True))
+    drop.extend(OmegaConf.to_container(feat_cfg.drop_extra, resolve=True))
+    return drop
+
+
 def resolve_features(cfg: DictConfig) -> list[str]:
     """Build and return a flat feature list from the Hydra features config based on scope and channel."""
     feat_cfg = cfg.features

@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 import awkward as ak
+import pandas as pd
 
 log = logging.getLogger(__name__)
 
@@ -33,3 +34,18 @@ def load_samples(
         log.info("Loaded %s (%d events)", path, len(out[sid]))
 
     return out
+
+
+def save_dataframe(df: pd.DataFrame, path: Path) -> None:
+    """Save a pandas DataFrame to a parquet file using PyArrow with snappy compression."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_parquet(path, engine="pyarrow", compression="snappy")
+    log.info("Saved %s (%d rows, %d columns)", path, len(df), len(df.columns))
+
+
+def load_dataframe(path: Path) -> pd.DataFrame:
+    """Load a pandas DataFrame from a parquet file."""
+    df = pd.read_parquet(Path(path), engine="pyarrow")
+    log.info("Loaded %s (%d rows, %d columns)", path, len(df), len(df.columns))
+    return df
