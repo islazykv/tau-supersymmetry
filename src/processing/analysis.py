@@ -99,4 +99,5 @@ def get_output_paths(cfg: DictConfig) -> dict[str, Path]:
         "samples_dir": base / "samples",
         "dataframes_dir": base / "dataframes",
         "plots_dir": base / "plots",
+        "models_dir": base / "models",
     }
