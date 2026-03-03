@@ -7,3 +7,14 @@ stages:
       - configs/
     outs:
       - data/processed/ML/24.2.28/Run2/Preselection/1_tau/
+
+  train:
+    cmd: uv run python train.py
+    deps:
+      - train.py
+      - src/models/
+      - configs/
+      - data/processed/ML/24.2.28/Run2/Preselection/1_tau/dataframes/mc.parquet
+    outs:
+      - data/processed/ML/24.2.28/Run2/Preselection/1_tau/models/
+      - data/processed/ML/24.2.28/Run2/Preselection/1_tau/dataframes/bdt_predictions.parquet

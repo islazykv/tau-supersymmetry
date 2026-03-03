@@ -1,2 +1,11 @@
 name: "standard_training"
 save_model: true
+
+# ---Split Strategy---
+# "train_test": single stratified 80/20 split (default)
+# "k_fold":     stratified K-fold cross-validation (OOF predictions)
+split_strategy: "train_test"
+n_splits: 5
+
+# ---Early Stopping---
+early_stopping_rounds: 50
