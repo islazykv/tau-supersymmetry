@@ -1,6 +1,6 @@
 run: "Run3"
 release: "R24"
-analysis_base: "24.2.28"
+analysis_base: "25.2.32"
 campaigns:
   - "MC23a"
   - "MC23c"
