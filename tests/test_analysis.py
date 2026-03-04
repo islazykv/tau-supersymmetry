@@ -47,9 +47,13 @@ def test_get_output_paths(ml_cfg):
     OmegaConf.update(ml_cfg, "analysis.region", "SR")
     OmegaConf.update(ml_cfg, "analysis.channel", "1")
     paths = get_output_paths(ml_cfg)
-    output_dir = paths["output_dir"]
-    assert isinstance(output_dir, Path)
-    assert "ML" in str(output_dir)
-    assert "run2" in str(output_dir)
-    assert "SR" in str(output_dir)
-    assert paths["plots_dir"] == output_dir / "plots"
+    assert set(paths) == {"samples_dir", "dataframes_dir", "plots_dir", "models_dir"}
+    base = paths["plots_dir"].parent
+    assert isinstance(base, Path)
+    assert "ML" in str(base)
+    assert "run2" in str(base)
+    assert "SR" in str(base)
+    assert paths["samples_dir"] == base / "samples"
+    assert paths["dataframes_dir"] == base / "dataframes"
+    assert paths["plots_dir"] == base / "plots"
+    assert paths["models_dir"] == base / "models"
