@@ -4,3 +4,4 @@ scan_path: "/disk/atlas3/data_MC/{analysis_base}/{campaign}/vector_XEplateau/"
 filter_patterns:
   - "SS"
   - "GG"
+  - "signal"
