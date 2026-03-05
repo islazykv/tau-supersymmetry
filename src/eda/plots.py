@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import atlas_mpl_style as ampl
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -25,33 +26,34 @@ def plot_class_balance(
         class_names = _resolve_class_names(df)
 
     n = len(class_order)
-    colors = [plt.cm.tab10(i % 10) for i in range(n)]
     has_weights = "class_weight" in df.columns
     n_panels = 2 if has_weights else 1
 
-    fig, axes = plt.subplots(1, n_panels, figsize=(7 * n_panels, 5))
+    fig, axes = plt.subplots(1, n_panels, figsize=(12 * n_panels, 6))
     axes = np.array(axes).reshape(-1)
 
     counts = df["class"].value_counts().reindex(class_order)
-    axes[0].bar(range(n), counts.values, color=colors)
+    axes[0].bar(range(n), counts.values, width=0.5)
     axes[0].set_xticks(range(n))
-    axes[0].set_xticklabels(class_names, rotation=45, ha="right")
+    axes[0].set_xticklabels(class_names, fontsize=14)
     axes[0].set_xlabel("Class")
     axes[0].set_ylabel("Event count")
-    axes[0].set_title("Unweighted class balance")
-    axes[0].ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
+    axes[0].set_title("Unweighted Countplot")
+    axes[0].ticklabel_format(axis="y", style="plain")
+    ampl.draw_atlas_label(0.05, 0.97, ax=axes[0])
 
     if has_weights:
         weighted = df.groupby("class")["class_weight"].sum().reindex(class_order)
-        axes[1].bar(range(n), weighted.values, color=colors)
+        axes[1].bar(range(n), weighted.values, width=0.5)
         axes[1].set_xticks(range(n))
-        axes[1].set_xticklabels(class_names, rotation=45, ha="right")
+        axes[1].set_xticklabels(class_names, fontsize=14)
         axes[1].set_xlabel("Class")
-        axes[1].set_ylabel("Weighted event count")
-        axes[1].set_title("Class-weighted balance")
-        axes[1].ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
+        axes[1].set_ylabel("Event count")
+        axes[1].set_title("Weighted Countplot")
+        axes[1].ticklabel_format(axis="y", style="plain")
+        ampl.draw_atlas_label(0.05, 0.97, ax=axes[1])
 
-    fig.tight_layout()
+    plt.subplots_adjust(wspace=0.2)
     return fig
 
 
