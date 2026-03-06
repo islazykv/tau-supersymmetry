@@ -8,6 +8,9 @@ from omegaconf import DictConfig, OmegaConf
 
 matplotlib.use("Agg")
 
+logging.getLogger("mlflow").setLevel(logging.WARNING)
+logging.getLogger("alembic").setLevel(logging.WARNING)
+
 root = pyrootutils.setup_root(
     search_from=__file__,
     indicator=[".git", "pyproject.toml"],
@@ -30,6 +33,7 @@ from src.models.splits import (  # noqa: E402
     prepare_features_target,
     train_test_split,
 )
+from src.eda.utils import get_class_names  # noqa: E402
 from src.processing.analysis import get_output_paths  # noqa: E402
 from src.processing.io import load_dataframe, save_dataframe  # noqa: E402
 from src.visualization.plots import save_figure  # noqa: E402
@@ -42,7 +46,7 @@ def main(cfg: DictConfig) -> None:
     """Run the full BDT training pipeline with MLflow experiment tracking."""
     log.info("Starting BDT training:\n%s", OmegaConf.to_yaml(cfg))
 
-    mlflow.set_tracking_uri("sqlite:///mlruns.db")
+    mlflow.set_tracking_uri(f"file://{root}/mlruns")
     mlflow.set_experiment(cfg.get("experiment_name", "tau-supersymmetry-bdt"))
 
     with mlflow.start_run():
@@ -70,9 +74,7 @@ def main(cfg: DictConfig) -> None:
         log.info("Loaded MC: %d events, %d columns", len(df_mc), len(df_mc.columns))
 
         # --- class labels ---
-        class_names = (
-            df_mc.groupby("class")["eventOrigin"].first().sort_index().tolist()
-        )
+        class_names = get_class_names(df_mc)
         n_classes = len(class_names)
         log.info("Classes (%d): %s", n_classes, class_names)
         mlflow.log_param("n_classes", n_classes)

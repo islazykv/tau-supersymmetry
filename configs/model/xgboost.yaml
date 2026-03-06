@@ -17,3 +17,4 @@ max_delta_step: 0
 tree_method: "hist"
 device: "cuda"
 seed: 1
+verbosity: 0
