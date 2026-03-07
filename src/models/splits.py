@@ -6,7 +6,7 @@ from sklearn.model_selection import train_test_split as _sklearn_split
 
 # Columns present in mc.parquet that are NOT input features for ML training
 _NON_TRAINING_COLS: frozenset[str] = frozenset(
-    {"class", "class_weight", "tau_n", "eventOrigin"}
+    {"class", "class_weight", "weight", "tau_n", "eventOrigin"}
 )
 
 
