@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import atlas_mpl_style as ampl
 import matplotlib.pyplot as plt
 import xgboost as xgb
 
@@ -8,39 +9,33 @@ def plot_training_curves(
     evals_result: dict[str, dict[str, list[float]]],
     metric: str,
 ) -> plt.Figure:
-    """Plot training and validation loss curves for a single model.
-
-    Parameters
-    ----------
-    evals_result : dict
-        ``model.evals_result()`` output — keys ``"validation_0"`` (train) and
-        ``"validation_1"`` (validation), each holding ``{metric: [values]}``.
-    metric : str
-        Name of the metric to plot (e.g. ``"mlogloss"``, ``"logloss"``).
-
-    Returns
-    -------
-    plt.Figure
-    """
+    """Plot training and validation loss curves with the best iteration marked."""
     train_loss = evals_result["validation_0"][metric]
     val_loss = evals_result["validation_1"][metric]
     best_iter = int(val_loss.index(min(val_loss)))
 
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.plot(train_loss, label="Train", color="royalblue", linewidth=1.5)
-    ax.plot(val_loss, label="Validation", color="firebrick", linewidth=1.5)
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(train_loss, label="Training loss", linewidth=1.5)
+    ax.plot(val_loss, label="Validation loss", linewidth=1.5)
     ax.axvline(
         best_iter,
-        color="grey",
+        color="blue",
         linestyle="--",
         linewidth=1.0,
-        label=f"Best iter: {best_iter}",
+        label=f"Optimal tree number: {best_iter}",
     )
-    ax.set_xlabel("Boosting Round")
-    ax.set_ylabel(metric)
-    ax.set_title(f"Training Curves — {metric}")
-    ax.legend()
+    ax.set_xlabel("Number of Trees")
+    ax.set_ylabel(f"Loss ({metric})")
+    ax.set_title("Loss Plot")
+    ax.legend(
+        loc="upper right",
+        prop={"size": 14},
+        labelspacing=0.1,
+        handlelength=1,
+        handleheight=1,
+    )
     ax.grid(True, alpha=0.3)
+    ampl.draw_atlas_label(0.02, 0.97, ax=ax)
     fig.tight_layout()
     return fig
 
@@ -49,22 +44,7 @@ def plot_kfold_training_curves(
     models: list[xgb.XGBClassifier],
     metric: str,
 ) -> plt.Figure:
-    """Plot per-fold validation loss curves for K-fold cross-validation.
-
-    Each fold is drawn as a separate line.  The mean validation curve across
-    all folds is overlaid in black.
-
-    Parameters
-    ----------
-    models : list[xgb.XGBClassifier]
-        Fitted models, one per fold (output of :func:`~src.models.bdt.train_kfold`).
-    metric : str
-        Name of the metric to plot.
-
-    Returns
-    -------
-    plt.Figure
-    """
+    """Plot per-fold validation loss curves with a mean curve overlaid in black."""
     import numpy as np
 
     fold_curves: list[list[float]] = []
@@ -97,10 +77,17 @@ def plot_kfold_training_curves(
         linestyle="--",
     )
 
-    ax.set_xlabel("Boosting Round")
-    ax.set_ylabel(metric)
-    ax.set_title(f"K-Fold Validation Curves — {metric}")
-    ax.legend(fontsize=8)
+    ax.set_xlabel("Number of Trees")
+    ax.set_ylabel(f"Loss ({metric})")
+    ax.set_title("Loss Plot")
+    ax.legend(
+        loc="upper right",
+        prop={"size": 14},
+        labelspacing=0.1,
+        handlelength=1,
+        handleheight=1,
+    )
     ax.grid(True, alpha=0.3)
+    ampl.draw_atlas_label(0.02, 0.97, ax=ax)
     fig.tight_layout()
     return fig
