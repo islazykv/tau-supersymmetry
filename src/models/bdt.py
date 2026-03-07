@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import xgboost as xgb
 from omegaconf import DictConfig, OmegaConf
+from tqdm.auto import tqdm
 
 log = logging.getLogger(__name__)
 
@@ -15,6 +16,27 @@ _MULTICLASS_OBJECTIVE = "multi:softproba"
 _MULTICLASS_METRIC = "mlogloss"
 _BINARY_OBJECTIVE = "binary:logistic"
 _BINARY_METRIC = "logloss"
+
+
+class _TqdmCallback(xgb.callback.TrainingCallback):
+    """Updates a pre-created tqdm bar after each boosting round."""
+
+    def __init__(self, bar: tqdm) -> None:
+        super().__init__()
+        self._bar = bar
+
+    def after_iteration(self, model, epoch, evals_log):
+        postfix = {}
+        for name, metrics in evals_log.items():
+            tag = "train" if name == "validation_0" else "val"
+            for metric, values in metrics.items():
+                postfix[f"{tag}_{metric}"] = f"{values[-1]:.4f}"
+        self._bar.set_postfix(postfix)
+        self._bar.update(1)
+        return False
+
+    def after_training(self, model):
+        return model
 
 
 def build_params(cfg: DictConfig, n_classes: int) -> dict:
@@ -60,6 +82,7 @@ def train(
     y_val: pd.Series,
     w_train: pd.Series | None = None,
     early_stopping_rounds: int = 50,
+    verbose: bool = True,
 ) -> xgb.XGBClassifier:
     """Train an XGBoost classifier with early stopping on the validation set.
 
@@ -100,7 +123,18 @@ def train(
     if w_train is not None:
         fit_kwargs["sample_weight"] = w_train.to_numpy()
 
+    pbar = (
+        tqdm(total=params.get("n_estimators", 100), desc="Training", unit="tree")
+        if verbose
+        else None
+    )
+    if pbar is not None:
+        fit_kwargs["callbacks"] = [_TqdmCallback(pbar)]
+
     model.fit(X_train, y_train, **fit_kwargs)
+
+    if pbar is not None:
+        pbar.close()
     log.info(
         "Training complete — best iteration: %d, best score: %.6f",
         model.best_iteration,
@@ -115,6 +149,7 @@ def train_kfold(
         tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series, pd.Series, pd.Series]
     ],
     early_stopping_rounds: int = 50,
+    verbose: bool = True,
 ) -> tuple[list[xgb.XGBClassifier], np.ndarray, np.ndarray, pd.Series]:
     """Train one model per fold and return out-of-fold (OOF) predictions.
 
@@ -146,6 +181,7 @@ def train_kfold(
     y_probas: list[np.ndarray] = []
     y_tests: list[pd.Series] = []
 
+    fold_pbar = tqdm(total=len(folds), desc="Folds", unit="fold") if verbose else None
     for fold_idx, (X_tr, X_te, y_tr, y_te, w_tr, _) in enumerate(folds):
         log.info("Training fold %d / %d", fold_idx + 1, len(folds))
         model = train(
@@ -156,6 +192,7 @@ def train_kfold(
             y_te,
             w_train=w_tr,
             early_stopping_rounds=early_stopping_rounds,
+            verbose=verbose,
         )
         y_pred_fold, y_proba_fold = predict(model, X_te)
 
@@ -163,6 +200,11 @@ def train_kfold(
         y_preds.append(y_pred_fold)
         y_probas.append(y_proba_fold)
         y_tests.append(y_te)
+        if fold_pbar is not None:
+            fold_pbar.update(1)
+
+    if fold_pbar is not None:
+        fold_pbar.close()
 
     y_pred_oof = np.concatenate(y_preds)
     y_proba_oof = np.vstack(y_probas)
