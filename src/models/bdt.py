@@ -9,6 +9,8 @@ import xgboost as xgb
 from omegaconf import DictConfig, OmegaConf
 from tqdm.auto import tqdm
 
+from src.models.splits import build_predictions_frame  # noqa: F401
+
 log = logging.getLogger(__name__)
 
 # XGBoost objectives and metrics keyed by number of classes
@@ -269,28 +271,3 @@ def load_model(path: Path) -> xgb.XGBClassifier:
     model.load_model(str(Path(path)))
     log.info("Model loaded from %s", path)
     return model
-
-
-def build_predictions_frame(
-    y_true: pd.Series,
-    y_pred: np.ndarray,
-    y_proba: np.ndarray,
-    class_names: list[str],
-) -> pd.DataFrame:
-    """Assemble a tidy DataFrame of true labels, hard predictions, and per-class probabilities.
-
-    Column layout::
-
-        y_true | y_pred | p_<class_0> | p_<class_1> | ...
-
-    This is the file consumed by the downstream evaluation step.
-    """
-    df = pd.DataFrame(
-        {
-            "y_true": y_true.to_numpy(),
-            "y_pred": y_pred,
-        }
-    )
-    for i, name in enumerate(class_names):
-        df[f"p_{name}"] = y_proba[:, i]
-    return df

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import train_test_split as _sklearn_split
@@ -123,3 +124,28 @@ def kfold_split(
             )
         )
     return folds
+
+
+def build_predictions_frame(
+    y_true: pd.Series,
+    y_pred: np.ndarray,
+    y_proba: np.ndarray,
+    class_names: list[str],
+) -> pd.DataFrame:
+    """Assemble a tidy DataFrame of true labels, hard predictions, and per-class probabilities.
+
+    Column layout::
+
+        y_true | y_pred | p_<class_0> | p_<class_1> | ...
+
+    This is the file consumed by the downstream evaluation step.
+    """
+    df = pd.DataFrame(
+        {
+            "y_true": y_true.to_numpy(),
+            "y_pred": y_pred,
+        }
+    )
+    for i, name in enumerate(class_names):
+        df[f"p_{name}"] = y_proba[:, i]
+    return df
