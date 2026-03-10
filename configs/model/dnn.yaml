@@ -6,7 +6,7 @@ activation: "ReLU"
 dropout: 0.2
 
 # ---Training Parameters---
-n_epochs: 10
+n_epochs: 1000
 batch_size: 1024
 
 # ---Optimizer Parameters---
