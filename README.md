@@ -62,7 +62,7 @@ make ui              # MLflow UI at http://localhost:5000
 ├── notebooks/            # Exploratory analysis
 ├── data/                 # Raw and processed data (DVC-tracked)
 ├── preprocess.py         # Preprocessing entry point
-├── train.py              # Training entry point
+├── train_bdt.py          # BDT training entry point
 ├── dvc.yaml              # DVC pipeline definition
 └── Makefile              # Developer workflow
 ```

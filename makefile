@@ -22,7 +22,7 @@ eda:
 	uv run python eda.py
 
 train:
-	uv run python train.py
+	uv run python train_bdt.py
 
 tune:
 	uv run python tune.py
