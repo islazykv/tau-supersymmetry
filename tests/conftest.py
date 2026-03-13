@@ -63,7 +63,12 @@ def ml_cfg():
 
 
 def make_ak_array(n: int = 10, fields: list[str] | None = None) -> ak.Array:
-    """Create a small awkward array with the given fields."""
+    """Create a small awkward array with the given fields.
+
+    Args:
+        n: Number of events.
+        fields: Field names to include; defaults to ['met', 'weight'].
+    """
     if fields is None:
         fields = ["met", "weight"]
     data = {f: np.random.default_rng(42).random(n) for f in fields}
