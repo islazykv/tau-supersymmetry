@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import awkward as ak
 import numpy as np
+import pandas as pd
 
-from src.processing.io import load_samples, save_samples
+from src.processing.io import load_dataframe, load_samples, save_dataframe, save_samples
 
 
 def test_save_load_roundtrip(tmp_path):
@@ -22,3 +23,17 @@ def test_save_load_roundtrip(tmp_path):
     assert len(loaded["sample_a"]) == 5
     assert len(loaded["sample_b"]) == 3
     assert set(loaded["sample_a"].fields) == {"x", "y"}
+
+
+def test_save_load_dataframe_roundtrip(tmp_path):
+    df = pd.DataFrame({"x": [1.0, 2.0, 3.0], "y": ["a", "b", "c"]})
+    path = tmp_path / "test.parquet"
+
+    save_dataframe(df, path)
+
+    assert path.exists()
+
+    loaded = load_dataframe(path)
+    assert len(loaded) == 3
+    assert list(loaded.columns) == ["x", "y"]
+    assert loaded["x"].tolist() == [1.0, 2.0, 3.0]
